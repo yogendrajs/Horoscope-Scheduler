@@ -1,53 +1,59 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const nodeoutlook = require("nodejs-nodemailer-outlook");
-let cron = require('node-cron');
+const nodemailer = require("nodemailer");
+let cron = require("node-cron");
 require("dotenv").config();
 
 (async function() {
-	let allHoroscopes = [];
-	let signs = [
-		"aries",
-		"taurus",
-		"gemini",
-		"cancer",
-		"leo",
-		"virgo",
-		"libra",
-		"scorpio",
-		"sagittarius",
-		"capricorn",
-		"aquarius",
-		"pisces"
-	];
-	for (let i of signs) {
-		let eachSign = {};
-		console.log(
-			`https://www.astrology.com/horoscope/daily/tomorrow/${i}.html..................`
-		);
-		let { data } = await axios.get(
-			`https://www.astrology.com/horoscope/daily/tomorrow/${i}.html`
-		);
-		const $ = cheerio.load(data);
-		let siteHeading = $(".section-horoscopes");
+	let transporter = nodemailer.createTransport({
+		service: "gmail",
+		auth: {
+			user: process.env.EMAIL, // generated ethereal user
+			pass: process.env.PASS // generated ethereal password
+		}
+  });
+  
+  console.log(`Code execution started!`);
 
-		const output = siteHeading.find("p").text();
-		// console.log(output, '\n');
-		eachSign[i.charAt(0).toUpperCase()+i.slice(1)] = output;
-		allHoroscopes.push(eachSign);
-	}
-    console.log(allHoroscopes);
+	cron.schedule("10 14 15 * * *", async () => {
+		let allHoroscopes = [];
+		let signs = [
+			"aries",
+			"taurus",
+			"gemini",
+			"cancer",
+			"leo",
+			"virgo",
+			"libra",
+			"scorpio",
+			"sagittarius",
+			"capricorn",
+			"aquarius",
+			"pisces"
+		];
+		for (let i of signs) {
+			let eachSign = {};
+			console.log(
+				`https://www.astrology.com/horoscope/daily/tomorrow/${i}.html..................`
+			);
+			let { data } = await axios.get(
+				`https://www.astrology.com/horoscope/daily/tomorrow/${i}.html`
+			);
+			const $ = cheerio.load(data);
+			let siteHeading = $(".section-horoscopes");
 
-    cron.schedule('30 55 2 * * *', () => {
-        nodeoutlook.sendEmail({
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASS
-            },
-            from: process.env.EMAIL,
-            to: "yogendra18@navgurukul.org",
-            subject: "Here's your TODAY'S Horoscope",
-            html: `<!DOCTYPE html>
+			const output = siteHeading.find("p").text();
+			// console.log(output, '\n');
+			eachSign[i.charAt(0).toUpperCase() + i.slice(1)] = output;
+			allHoroscopes.push(eachSign);
+		}
+		// console.log(allHoroscopes);
+
+		let info = await transporter.sendMail({
+			from: process.env.EMAIL,
+			to: "<Recipient>",
+			subject: "Here's your TODAY'S Horoscope",
+			html: `<!DOCTYPE html>
             <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
             <head>
                 <meta charset="utf-8"> <!-- utf-8 works for most cases -->
@@ -427,8 +433,16 @@ require("dotenv").config();
                                       <tr>
                                         <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                             <div class="heading-section">
-                                                              <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[0])[0]}</h2>
-                                                              <p>${Object.values(allHoroscopes[0])[0]}</p>
+                                                              <h2 style="font-size: 22px;">${
+																																Object.keys(
+																																	allHoroscopes[0]
+																																)[0]
+																															}</h2>
+                                                              <p>${
+																																Object.values(
+																																	allHoroscopes[0]
+																																)[0]
+																															}</p>
                                                             </div>
                                         </td>
                                       </tr>
@@ -457,8 +471,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[1])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[1])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[1]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[1]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -484,8 +506,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[2])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[2])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[2]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[2]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -510,8 +540,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[3])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[3])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[3]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[3]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -537,8 +575,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[4])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[4])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[4]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[4]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -564,8 +610,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[5])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[5])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[5]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[5]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -591,8 +645,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[6])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[6])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[6]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[6]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -618,8 +680,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[7])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[7])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[7]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[7]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -645,8 +715,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[8])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[8])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[8]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[8]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -672,8 +750,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[9])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[9])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[9]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[9]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -700,8 +786,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[10])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[10])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[10]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[10]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -728,8 +822,16 @@ require("dotenv").config();
                                     <tr>
                                       <td class="text-services" style="text-align: left; padding: 20px 30px;">
                                           <div class="heading-section">
-                                                            <h2 style="font-size: 22px;">${Object.keys(allHoroscopes[11])[0]}</h2>
-                                                            <p>${Object.values(allHoroscopes[11])[0]}</p>
+                                                            <h2 style="font-size: 22px;">${
+																															Object.keys(
+																																allHoroscopes[11]
+																															)[0]
+																														}</h2>
+                                                            <p>${
+																															Object.values(
+																																allHoroscopes[11]
+																															)[0]
+																														}</p>
                                                           </div>
                                       </td>
                                     </tr>
@@ -772,12 +874,8 @@ require("dotenv").config();
                 </div>
               </center>
             </body>
-            </html>`,
-    
-            onError: e => console.log(e),
-            onSuccess: i => console.log(i)
-        });
-    })
-    
-
+            </html>`
+		});
+		console.log("Message sent: %s", info);
+	});
 })();
